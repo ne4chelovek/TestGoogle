@@ -1,5 +1,7 @@
-package com.example.testgoogle;
+package com.example.testgoogle.tests;
 
+import com.example.testgoogle.pages.MainPage;
+import com.example.testgoogle.pages.ResultsPage;
 import org.junit.jupiter.api.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -9,7 +11,6 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
-import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
@@ -17,7 +18,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainPageTest {
+public class BingSearchTest {
     private WebDriver driver;
 
     @BeforeEach
@@ -37,33 +38,36 @@ public class MainPageTest {
     }
 
     @Test
-    public void search() {
-
+    public void searchResultsTest() {
         String input = "Selenium";
-        WebElement searchField = driver.findElement(By.cssSelector("#sb_form_q"));
-        searchField.sendKeys(input);
-        searchField.submit();
+        MainPage mp = new MainPage(driver);
+        mp.sendText(input);
 
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(7));
         wait.until(ExpectedConditions.and(
                 ExpectedConditions.attributeContains(By.cssSelector("h2 > a[href]"), "href", "selenium"),
                 ExpectedConditions.elementToBeClickable(By.cssSelector("h2 > a[href]"))
         ));
-
-        List<WebElement> results = driver.findElements(By.cssSelector("h2 > a[href]"));
-
-
-        clickElement(results, 0);
-        ArrayList<String> tabs = new ArrayList<> (driver.getWindowHandles());
+        ResultsPage rp = new ResultsPage(driver);
+        rp.clickElement(0);
+        ArrayList<String> tabs = new ArrayList<>(driver.getWindowHandles());
         driver.switchTo().window(tabs.get(1));
+
         driver.getCurrentUrl();
-        assertEquals("https://www.selenium.dev/" , driver.getCurrentUrl());
-
+        assertEquals("https://www.selenium.dev/", driver.getCurrentUrl(), "открыта не верная ссылка");
     }
 
-        public void clickElement (List<WebElement> results,int num){
-            results.get(0).click();
-            System.out.println("Переход по ссылке");
+    @Test
+    public void searchFieldTest() {
+        String input = "Selenium";
 
+        MainPage mp = new MainPage(driver);
+        mp.sendText(input);
+
+        ResultsPage rp = new ResultsPage(driver);
+
+        assertEquals(input, rp.getTestFromSearchField(), "Текст не совпал");
     }
+
+
 }
